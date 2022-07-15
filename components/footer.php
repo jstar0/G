@@ -25,7 +25,7 @@ $devTag = !defined('__TYPECHO_DEBUG__') || __TYPECHO_DEBUG__ != true ? G::$versi
     </div>
     <p id="footer-meta" class="clear">
         <span class="left"><a class="icp" href="<?php $this->options->icpUrl(); ?>" rel="noopener noreferrer"><?php echo G::getICP(); ?></a></span>
-        <span class="right"><?php echo $this->options->buildYear . " - " . date("Y"); ?> &copy 心纪元 Xin Era LLC.</span>
+        <span class="right"><?php echo date("Y"); ?> &copy 心纪元 Xin Era LLC.</span>
     </p>
 </footer>
 </div>
