@@ -16,11 +16,18 @@ $devTag = !defined('__TYPECHO_DEBUG__') || __TYPECHO_DEBUG__ != true ? G::$versi
             <?php while ($pages->next()): ?>
                 <a href="<?php $pages->permalink(); ?>" <?php if ($this->is("page", $pages->slug)): ?>class="nav-focus"<?php endif; ?> title="<?php $pages->title(); ?>"><?php $pages->title(); ?></a>
             <?php endwhile; ?>
+            
+            <a href="https://status.mcxin.top" target="_blank">状态</a>
+            <a href="https://pan.mcxin.top" target="_blank">网盘</a>
+			<a href="https://www.mcxin.top/admin/" target="_blank">控制台</a>
+			
+            <b><a href="https://www.mcxin.top/archives/android.html">下载移动端</a></b>
+            
         </nav>
     </div>
     <p id="footer-meta" class="clear">
         <span class="left"><a class="icp" href="<?php $this->options->icpUrl(); ?>" rel="noopener noreferrer"><?php echo G::getICP(); ?></a></span>
-        <span class="right"><?php echo $this->options->buildYear . " - " . date("Y"); ?> &copy <?php $this->options->title(); ?></span>
+        <span class="right"><?php echo $this->options->buildYear . " - " . date("Y"); ?> &copy 心纪元 Xin Era LLC.</span>
     </p>
 </footer>
 </div>
