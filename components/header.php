@@ -102,7 +102,7 @@ if (isset($_POST['DYLM'])) {
                     <?php if ($this->options->enableIndexPage): ?>
                         <a href="<?php echo G::getArticlePath(); ?>" <?php if ($this->is('archive') or $this->is('post')) : ?> class="nav-focus"<?php endif; ?>>文章</a>
                     <?php endif; ?>
-                    /* <?php $this->widget('Widget_Contents_Page_List')->to($pages); ?>
+                    <!-- <?php $this->widget('Widget_Contents_Page_List')->to($pages); ?> 
                     <?php while ($pages->next()): ?>
                         <?php if (strtolower($pages->slug) == 'links' or strtolower($pages->slug) == 'about' or $pages->fields->headerDisplay == 1): ?>
                             <a
@@ -111,7 +111,7 @@ if (isset($_POST['DYLM'])) {
                                 title="<?php $pages->title(); ?>"
                             ><?php $pages->title(); ?></a>
                         <?php endif; ?>
-                    <?php endwhile; ?> */
+                    <?php endwhile; ?> -->
                     
                     <a href="https://map.mcxin.top" target="_blank">地图</a>
                     <a href="https://status.mcxin.top" target="_blank">状态</a>
