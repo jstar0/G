@@ -14,9 +14,21 @@ if (isset($_POST['DYLM'])) {
     <meta charset="<?php $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport">
+    
     <!-- Set Toolbar Color [JS] SHINBASHI + AI -->
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0089A7">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#5ba0e4">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0D5661">
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TYY0RXBJLT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-TYY0RXBJLT');
+    </script>
+  
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="//source.ahdark.com">
     <link rel="icon" type="image/png" href="<?php $this->options->favicon(); ?>">
@@ -100,6 +112,10 @@ if (isset($_POST['DYLM'])) {
                             ><?php $pages->title(); ?></a>
                         <?php endif; ?>
                     <?php endwhile; ?>
+                    
+                    <a href="https://map.mcxin.top" target="_blank">地图</a>
+                    <a href="https://account.mcxin.top" target="_blank">账号</a>
+                    
                     <?php if ($this->options->enableHeaderSearch): ?>
                         <a href="#" class="search-form-input">搜索</a>
                     <?php endif; ?>
