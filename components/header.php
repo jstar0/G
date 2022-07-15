@@ -115,8 +115,9 @@ if (isset($_POST['DYLM'])) {
                     
                     <a href="https://map.mcxin.top" target="_blank">地图</a>
                     <a href="https://status.mcxin.top" target="_blank">状态</a>
+                    <a href="https://pan.mcxin.top" target="_blank">网盘</a>
                     <a href="https://forum.mcxin.top" target="_blank">论坛</a>
-                    <a href="https://account.mcxin.top" target="_blank">账号</a>
+                    <a href="https://account.mcxin.top" target="_blank">账号平台</a>
                     
                     <?php if ($this->options->enableHeaderSearch): ?>
                         <a href="#" class="search-form-input">搜索</a>
