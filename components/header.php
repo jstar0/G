@@ -13,7 +13,7 @@ if (isset($_POST['DYLM'])) {
 <head>
     <meta charset="<?php $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" name="viewport">
     
     <!-- Set Toolbar Color [JS] SHINBASHI + AI -->
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#5ba0e4">
@@ -51,9 +51,7 @@ if (isset($_POST['DYLM'])) {
     <?php endif; ?>
     <link rel="preload" href="<?php echo G::staticUrl('static/js/spotlight.bundle.js'); ?>" as="script">
     <link rel="stylesheet" href="<?php echo G::staticUrl('static/css/G.css'); ?>?v=<?php echo $devTag; ?>">
-    <link rel="stylesheet <?php if (!isset($_COOKIE['night']) || $_COOKIE['night'] != '1') {
-        echo 'alternate';
-    } ?>" href="<?php echo G::staticUrl("static/css/dark$minInfix.css?v=$devTag"); ?>" title="dark">
+    <link rel="stylesheet" href="<?php echo G::staticUrl("static/css/dark$minInfix.css?v=$devTag"); ?>" title="dark">
 
     <style>
         /* 设置自定义背景[颜色/图片] */
@@ -77,7 +75,9 @@ if (isset($_POST['DYLM'])) {
         
         window.G_CONFIG = {
             katex: <?php echo $this->options->enableKatex == 1 ? 'true' : 'false' ?>,
-            imgUrl: "<?php echo G::staticUrl('static/img/'); ?>"
+            imgUrl: "<?php echo G::staticUrl('static/img/'); ?>",
+            autoTOC: <?php echo G::$config["enableDefaultTOC"] == 1 ? 'true' : 'false' ?>,
+            nightSpan: "<?php echo G::$config["autoNightSpan"]; ?>"
         };
 
         function custom_callback() {
