@@ -6,7 +6,7 @@
                 <img id="profile-avatar" src="<?php echo $this->options->profileAvatar; ?>" alt="avatar">
             </div>
             <div class="profile-cover" style="background-image:url(<?php echo $this->options->profileBG; ?>)"></div>
-            <h4><?php $this->author(); ?></h4>
+            <h4>心纪元博客</h4>
             <i><?php echo $this->options->profileDes; ?></i>
             <div class="profile-meta clear">
                 <?php Typecho_Widget::widget('Widget_Stat')->to($stat); ?>
