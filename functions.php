@@ -11,6 +11,108 @@ Typecho_Plugin::factory('admin/write-page.php')->bottom = array('GEditor', 'addB
 Typecho_Plugin::factory('admin/write-post.php')->bottom = array('GEditor', 'wordCounter');
 Typecho_Plugin::factory('admin/write-page.php')->bottom = array('GEditor', 'wordCounter');
 
+/**
+ * 是否存在备份
+ */
+function hasBackup($db) {
+    return $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:'.G::$themeBackup));
+}
+
+/**
+ * 备份完成提示
+ */
+function backupNotice($msg, $refresh = true) {
+    $content = $msg.''.($refresh ? '，即将自动刷新' : '');
+    if ($refresh) {
+        $url = Helper::options()->adminUrl.'options-theme.php';
+        $content .= '
+            <a href="'.$url.'">手动刷新</a>
+            <script language="JavaScript">window.setTimeout("location=\''.$url.'\'", 2500);</script>
+        ';
+    }
+
+    echo '<div class="backup-notice">'.$content.'</div>';
+}
+
+/**
+ * 备份操作
+ */
+function makeBackup($db, $hasBackup) {
+    $currentConfig = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:G'))['value'];
+    $query = $hasBackup
+        ? $db->update('table.options')->rows(array('value' => $currentConfig))->where('name = ?', 'theme:'.G::$themeBackup)
+        : $db->insert('table.options')->rows(array('name' => 'theme:'.G::$themeBackup, 'user' => '0', 'value' => $currentConfig));
+    
+    $rows = $db->query($query);
+    
+    return ['msg' => $hasBackup ? '备份已经成功更新' : '备份成功', 'refresh' => true];
+}
+
+/**
+ * 恢复备份
+ */
+function restoreBackup($db, $hasBackup) {
+    if (!$hasBackup) 
+        return ['msg' => '没有模板备份数据，恢复不了哦！', 'refresh' => false];
+    
+    $backupConfig = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:'.G::$themeBackup))['value'];
+    $update = $db->update('table.options')->rows(array('value' => $backupConfig))->where('name = ?', 'theme:G');
+    $updateRows = $db->query($update);
+
+    return ['msg' => '恢复成功', 'refresh' => true];
+}
+
+/**
+ * 删除备份
+ */
+function deleteBackup($db, $hasBackup) {
+    if (!$hasBackup) 
+        return ['msg' => '没有模板备份数据哦', 'refresh' => false];
+
+    $delete = $db->delete('table.options')->where('name = ?', 'theme:'.G::$themeBackup);
+    $deletedRows = $db->query($delete);
+    
+    return ['msg' => '删除成功', 'refresh' => true];
+}
+
+/**
+ * 备份主方法
+ */
+function backup() {
+    $db = Typecho_Db::get();
+    $hasBackup = hasBackup($db);
+    if (isset($_POST['type'])) {
+        $result = [];
+        switch($_POST['type']) {
+            case '创建备份':
+            case '更新备份':
+                $result = makeBackup($db, $hasBackup);
+                break;
+            case '恢复备份':
+                $result = restoreBackup($db, $hasBackup);
+                break;
+            case '删除备份':
+                $result = deleteBackup($db, $hasBackup);
+                break;
+            default:
+                $result = ["msg" => "", "refresh" => false];
+                break;
+        }
+        if ($result["msg"])
+            backupNotice($result["msg"], $result["refresh"]);
+    }
+    echo '
+        <div id="backup">
+            <form class="protected Data-backup" action="?'.G::$themeBackup.'" method="post">
+                <h4>数据备份</h4>
+                <p style="opacity: 0.5">'.($hasBackup ? '当前已有备份' : '当前暂无备份').'，你可以选择</p>
+                <input type="submit" name="type" class="btn btn-s" value="'.($hasBackup ? '更新备份' : '创建备份').'" />&nbsp;&nbsp;
+                '.($hasBackup ? '<input type="submit" name="type" class="btn btn-s" value="恢复备份" />&nbsp;&nbsp;' : '').'
+                '.($hasBackup ? '<input type="submit" name="type" class="btn btn-s" value="删除备份" />' : '').'
+            </form>
+        </div>
+    ';
+}
 
 function themeConfig($form)
 {
@@ -83,6 +185,14 @@ function themeConfig($form)
     $autoNightSpan = new Typecho_Widget_Helper_Form_Element_Text('autoNightSpan', null, '23-6', _t('自动夜间模式时间段'), _t('24小时制，当前晚上x点到第二天早上y点视为夜间，需要自动开启夜间模式，例: 23-6'));
     $form->addInput($autoNightSpan);
 
+    $autoNightMode = new Typecho_Widget_Helper_Form_Element_Radio('autoNightMode', array(
+        '3' => _t('跟随系统'),
+        '2' => _t('自定义时间段'),
+        '1' => _t('同时开启'),
+        '0' => _t('关闭')
+    ), '3', _t('自动夜间模式控制模式'), _t('默认为跟随系统'));
+    $form->addInput($autoNightMode);
+
     $enableDefaultTOC = new Typecho_Widget_Helper_Form_Element_Radio('enableDefaultTOC', array(
         '1' => _t('开启'),
         '0' => _t('关闭')
@@ -153,67 +263,7 @@ function themeConfig($form)
     $advanceSetting = new Typecho_Widget_Helper_Form_Element_Textarea('advanceSetting', null, null, _t('高级设置'), _t('看着就很高级'));
     $form->addInput($advanceSetting);
 
-    $db = Typecho_Db::get();
-    $sjdq = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:G'));
-    $ysj = $sjdq['value'];
-    if (isset($_POST['type'])) {
-        if ($_POST["type"] == "备份模板数据") {
-            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:Gbf'))) {
-                $update = $db->update('table.options')->rows(array('value' => $ysj))->where('name = ?', 'theme:Gbf');
-                $updateRows = $db->query($update);
-                echo '<div class="tongzhi">备份已更新，请等待自动刷新！如果等不到请点击';
-                ?>
-                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
-                <script language="JavaScript">window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);</script>
-                <?php
-            } else {
-                if ($ysj) {
-                    $insert = $db->insert('table.options')->rows(array('name' => 'theme:Gbf', 'user' => '0', 'value' => $ysj));
-                    $insertId = $db->query($insert);
-                    echo '<div class="tongzhi">备份完成，请等待自动刷新！如果等不到请点击';
-                    ?>
-                    <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
-                    <script language="JavaScript">window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);</script>
-                    <?php
-                }
-            }
-        }
-        if ($_POST["type"] == "还原模板数据") {
-
-            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:Gbf'))) {
-
-                $sjdub = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:Gbf'));
-                $bsj = $sjdub['value'];
-                $update = $db->update('table.options')->rows(array('value' => $bsj))->where('name = ?', 'theme:G');
-                $updateRows = $db->query($update);
-                echo '<div class="tongzhi">检测到模板备份数据，恢复完成，请等待自动刷新！如果等不到请点击';
-                ?>
-                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
-                <script language="JavaScript">window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2000);</script>
-                <?php
-
-            } else {
-
-                echo '<div class="tongzhi">没有模板备份数据，恢复不了哦！</div>';
-
-            }
-        }
-        if ($_POST["type"] == "删除备份数据") {
-            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:Gbf'))) {
-                $delete = $db->delete('table.options')->where('name = ?', 'theme:Gbf');
-                $deletedRows = $db->query($delete);
-                echo '<div class="tongzhi">删除成功，请等待自动刷新，如果等不到请点击';
-                ?>
-                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
-                <script language="JavaScript">window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);</script>
-                <?php
-            } else {
-                echo '<div class="tongzhi">不用删了！备份不存在！！！</div>';
-            }
-        }
-    }
-    echo '<div id="backup"><form class="protected Data-backup" action="?Gbf" method="post"><h4>数据备份</h4>
-    <input type="submit" name="type" class="btn btn-s" value="备份模板数据" />&nbsp;&nbsp;<input type="submit" name="type" class="btn btn-s" value="还原模板数据" />&nbsp;&nbsp;<input type="submit" name="type" class="btn btn-s" value="删除备份数据" /></form></div>';
+    backup();
 }
 
 
